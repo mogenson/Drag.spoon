@@ -3,6 +3,8 @@ Drag a window to a new space in Mission Control. This Spoon is a workaround for 
 
 Inspired by [Stephan Casas](https://github.com/stephancasas/stephan-hates-osascript/blob/main/jxa/move-window-to-desktop.jxa.js) and the Hammerspoon [spaces module](https://github.com/Hammerspoon/hammerspoon/tree/master/extensions/spaces).
 
+Tested with MacOS 14 and 15.
+
 ## Usage
 
 Load the Spoon and call the `Drag:focusedWindowToSpace(space_id)` method.
