@@ -30,3 +30,4 @@ Mission Control is actually a full screen application. The Mission Control windo
 
 - The window must be visible on the active space of the active screen, so we can drag it with the mouse. The current focused window satisfies these requirements.
 - The window must have a unique title. If two windows have the same title, there's no guarantee for which one will be found first.
+- The delays between mouse events may need to be tuned depending on the computer and MacOS animation speed.
