@@ -148,8 +148,11 @@ function Drag:focusedWindowToSpace(space_id)
         return
     end
 
-    local title = focused_window:title() or focused_window:application()
-    if not title then
+    local title = focused_window:title()
+    if not title or #title == 0 then
+        title = focused_window:application():title()
+    end
+    if not title or #title == 0 then
         log.e("no title for window")
         return
     end
@@ -174,13 +177,19 @@ function Drag:focusedWindowToSpace(space_id)
 
     -- find position of window with matching title
     local start_position
-    for _, window in ipairs(windows) do
-        if window.AXTitle == title then
-            start_position = hs.geometry.new(window.AXFrame).center
+    repeat
+        log.vf("looking for window with title: %s", title)
+        for _, window in ipairs(windows) do
+            if window.AXTitle:find(title, 1, true) then
+                start_position = hs.geometry(window.AXFrame).center
+            end
         end
-    end
+        -- remove either the last word or the last character until we have a match
+        local separater = title:find("%s+%S*$") or #title
+        title = title:sub(1, separater - 1)
+    until start_position or #title == 0
     if not start_position then
-        log.ef("couldn't find mission control window for title: %s", title)
+        log.e("couldn't find mission control window")
         return
     end
 
@@ -199,7 +208,7 @@ function Drag:focusedWindowToSpace(space_id)
     end
 
     -- get position of space
-    local end_position = hs.geometry.new(spaces[space_index].AXFrame).center
+    local end_position = hs.geometry(space.AXFrame).center
     log.vf("draging window from %s to %s", start_position, end_position)
 
     -- drag window to space then click on space to switch
