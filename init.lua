@@ -148,74 +148,19 @@ function Drag:focusedWindowToSpace(space_id)
         return
     end
 
-    local title = focused_window:title()
-    if not title or #title == 0 then
-        title = focused_window:application():title()
-    end
-    if not title or #title == 0 then
-        log.e("no title for window")
-        return
-    end
+    local titlebar = hs.geometry(focused_window:zoomButtonRect()).center
+    titlebar.x = titlebar.x + 10 -- click mouse a bit to the right of the button
 
-    local space_index = getSpaceIndex(space_id)
-    if not space_index then
-        log.e("can't find space_id in spaces")
-    end
+    mouseMove(titlebar)
+    mouseDown(titlebar)
 
-    log.vf("moving window %s to space %d", title, space_index)
+    wait(1)                       -- wait a good bit
 
-    -- open mission control and move mouse to expand spaces list
-    hs.spaces.openMissionControl()
-    mouseMove({ x = 10, y = 10 })
+    hs.spaces.gotoSpace(space_id) -- switch to new space
 
-    -- get all windows in mission control
-    local windows, err = getMissionControlWindows()
-    if err or not windows then
-        log.ef("couldn't get mission control windows: %s", err)
-        return
-    end
+    wait(1)                       -- wait a good more bit
 
-    -- find position of window with matching title
-    local start_position
-    repeat
-        log.vf("looking for window with title: %s", title)
-        for _, window in ipairs(windows) do
-            if window.AXTitle:find(title, 1, true) then
-                start_position = hs.geometry(window.AXFrame).center
-            end
-        end
-        -- remove either the last word or the last character until we have a match
-        local separater = title:find("%s+%S*$") or #title
-        title = title:sub(1, separater - 1)
-    until start_position or #title == 0
-    if not start_position then
-        log.e("couldn't find mission control window")
-        return
-    end
-
-    -- get all spaces in mission control
-    local spaces, err = getMissionControlSpaces()
-    if err or not spaces then
-        log.ef("couldn't get mission control spaces: %s", err)
-        return
-    end
-
-    -- get space for space index
-    local space = spaces[space_index]
-    if not space then
-        log.ef("no space for space index: %d", space_index)
-        return
-    end
-
-    -- get position of space
-    local end_position = hs.geometry(space.AXFrame).center
-    log.vf("draging window from %s to %s", start_position, end_position)
-
-    -- drag window to space then click on space to switch
-    wait(hs.spaces.MCwaitTime)
-    mouseDrag(start_position, end_position)
-    wait(hs.spaces.MCwaitTime)
-    mouseClick(end_position)
+    mouseUp(titlebar)
 end
 
 return Drag
